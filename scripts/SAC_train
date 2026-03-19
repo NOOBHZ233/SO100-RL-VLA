@@ -1,0 +1,3 @@
+python -m lerobot.rl.actor --config_path /home/zcw/SO100-RL/RL/mycode/configs/train_so100_sim.json
+
+python -m lerobot.rl.learner --config_path /home/zcw/SO100-RL/RL/mycode/configs/train_so100_sim.json

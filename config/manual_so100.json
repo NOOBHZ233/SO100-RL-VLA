@@ -1,0 +1,32 @@
+{
+    "env": {
+        "name": "gym_so100",
+        "task": "SO100PickCubeKeyboard-v0",
+        "fps": 10,
+        "robot": null,
+        "teleop": null,
+        "processor": {
+            "control_mode": "keyboard",
+            "gripper": {
+                "use_gripper": true,
+                "gripper_penalty": -0.02
+            },
+            "reset": {
+                "fixed_reset_joint_positions": [0.0, 1.57, -1.57, 0.0, 0.0, 0.5],
+                "reset_time_s": 2.0,
+                "control_time_s": 600.0,
+                "terminate_on_success": false
+            }
+        }
+    },
+    "dataset": {
+        "repo_id": "aractingi/franka_sim_pick_lift_6",
+        "root": null,
+        "task": "SO100PickCubeKeyboard-v0",
+        "num_episodes_to_record": 30,
+        "replay_episode": 0,
+        "push_to_hub": true
+    },
+    "mode": null,
+    "device": "cuda"
+}

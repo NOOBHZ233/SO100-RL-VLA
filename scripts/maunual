@@ -1,0 +1,2 @@
+
+python -m lerobot.rl.gym_manipulator --config_path /home/zcw/SO100-RL/RL/mycode/configs/manual_so100.json

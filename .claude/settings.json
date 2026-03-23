@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m rl.gym_manipulator --config_path scripts/maunual)"
+    ]
+  }
+}

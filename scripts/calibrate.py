@@ -4,24 +4,27 @@ from pprint import pformat
 
 import draccus
 
-from ..src.cameras.opencv.opencv_camera_config import OpenCVCameraConfig
-from ..src.cameras.realsense.realsense_camera_config import RealSenseCameraConfig
+from src.project.cameras.opencv.opencv_camera_config import OpenCVCameraConfig
+from src.project.cameras.realsense.realsense_camera_config import RealSenseCameraConfig
 
-from ..src.robots import (  # noqa: F401
+from src.project.utils.utils import init_logging
+
+from src.project.robots import (
     Robot,
     RobotConfig,
     make_robot_from_config,
-    so100_follower,
+    so100_follower
+
 )
 
-from ..src.teleoperators import(
+
+from src.project.teleoperators import(
     Teleoperator,
     TeleoperatorConfig,
     make_teleoperator_from_config,
-    so100_leader,
+    so100_leader
 )
 
-from ..src.utils.utils import init_logging
 
 @dataclass
 class CalibrateConfig:

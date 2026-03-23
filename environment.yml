@@ -1,0 +1,63 @@
+name: so100-rl-vla
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+
+  # PyTorch and CUDA
+  - pytorch>=2.0.0
+  - torchvision>=0.15.0
+  - torchaudio>=2.0.0
+  - pytorch-cuda=11.8
+
+  # Core scientific computing
+  - numpy>=1.24.0
+  - scipy>=1.10.0
+  - scikit-image>=0.22.0
+  - scikit-learn>=1.3.0
+
+  # Computer vision
+  - opencv>=4.8.0
+  - pillow>=10.0.0
+
+  # RL and simulation
+  - gym=0.26.0
+  - gymnasium>=0.29.0
+  - mujoco>=2.3.3
+
+  # Data processing
+  - pandas>=2.1.0
+  - pyarrow>=14.0.0
+
+  # Configuration
+  - omegaconf>=2.3.0
+  - hydra-core>=1.3.0
+  - pyyaml>=6.0.0
+
+  # Utilities
+  - tqdm>=4.66.0
+  - psutil>=5.9.0
+  - requests>=2.31.0
+
+  # pip dependencies
+  - pip:
+    - einops>=0.6.0
+    - transformers>=4.35.0
+    - datasets>=2.14.0
+    - peft>=0.7.0
+    - accelerate>=0.24.0
+    - wandb>=0.15.0
+    - protobuf>=4.24.0
+    - grpcio>=1.59.0
+    - grpcio-tools>=1.59.0
+    - mujoco-py>=2.1.2
+    - pygame>=2.5.0
+    - pyrealsense2>=2.54.0
+
+# Environment creation instructions:
+# conda env create -f environment.yml
+# conda activate so100-rl-vla

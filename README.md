@@ -64,9 +64,9 @@ python -m project.rl.learner --config_path /path/to/train_so100_sim.json
 
 ## Author
 
-Chengwei Zhang
-QQ: 2017809834
-Email: ZhangCW233666@163.com 
+- Chengwei Zhang
+- QQ: 2017809834
+- Email: ZhangCW233666@163.com 
 
 ---
 

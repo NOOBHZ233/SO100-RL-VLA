@@ -38,9 +38,9 @@ class PassiveViewerWrapper(gym.Wrapper):
         
         super().__init__(env)
 
-        # 启动交互式查看器
-        # 从 unwrapped 环境暴露 model 和 data，确保即使应用了其他包装器
-        # 也能操作基础的 MuJoCo 对象
+        # Launch interactive viewer
+        # Expose model and data from unwrapped environment to ensure we can
+        # access underlying MuJoCo objects even if other wrappers are applied
         self._viewer = mujoco.viewer.launch_passive(
             env.unwrapped.model,
             env.unwrapped.data,
@@ -48,18 +48,18 @@ class PassiveViewerWrapper(gym.Wrapper):
             # show_right_ui=show_right_ui,
         )
 
-        # 配置关节坐标轴可视化
+        # Configure joint axis visualization
         if show_joint_axes:
-            self._viewer.opt.frame = mujoco.mjtFrame.mjFRAME_SITE  # 显示site坐标系，以便能看到gripper_site的坐标轴
-            # 注意：MuJoCo 3.4.0中没有frame_size属性，坐标轴大小由相机视角自动决定
+            self._viewer.opt.frame = mujoco.mjtFrame.mjFRAME_SITE  # Show site coordinate frame to see gripper_site axes
+            # Note: MuJoCo 3.4.0 does not have frame_size property; axis size is automatically determined by camera view
         else:
-            # 隐藏所有坐标轴
+            # Hide all axes
             self._viewer.opt.frame = mujoco.mjtFrame.mjFRAME_NONE
 
-        # 确保渲染第一帧
+        # Ensure first frame is rendered
         self._viewer.sync()
 
-    # ==================== Gym API 重写 ====================
+    # ==================== Gym API Overrides ====================
 
     def reset(self, **kwargs):  # type: ignore[override]
        
@@ -76,7 +76,7 @@ class PassiveViewerWrapper(gym.Wrapper):
     def close(self) -> None:  # type: ignore[override]
         
 
-        # 1. 清理包装环境管理的渲染器（如果有）
+        # 1. Clean up renderer managed by wrapped environment (if any)
         base_env = self.env.unwrapped  # type: ignore[attr-defined]
         if hasattr(base_env, "_viewer"):
             viewer = base_env._viewer
@@ -84,19 +84,19 @@ class PassiveViewerWrapper(gym.Wrapper):
                 try:  # noqa: SIM105
                     viewer.close()
                 except Exception:
-                    # 忽略来自旧版本 MuJoCo 或已释放上下文的错误
+                    # Ignore errors from older MuJoCo versions or already released contexts
                     pass
-            # 防止底层 env 尝试再次关闭它
+            # Prevent underlying env from trying to close it again
             base_env._viewer = None
 
-        # 2. 关闭此包装器启动的被动查看器
+        # 2. Close passive viewer launched by this wrapper
         try:  # noqa: SIM105
             self._viewer.close()
         except Exception:  # pragma: no cover
-            # 防御性处理：避免传播查看器关闭错误
+            # Defensive handling: avoid propagating viewer close errors
             pass
 
-        # 3. 让包装的环境执行自己的清理
+        # 3. Let wrapped environment perform its own cleanup
         self.env.close()
 
     def __del__(self):

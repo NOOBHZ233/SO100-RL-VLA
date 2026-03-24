@@ -34,12 +34,12 @@ _SAMPLING_BOUNDS = np.asarray([[-0.5, -0.5], [0.5, 0.5]])
 
 
 class SO100PickCubeGymEnv(SO100GymEnv):
-    """SO100 机械臂抓取方块任务环境
+    """SO100 Robot Arm Cube Pickup Task Environment
 
-    任务描述:
-    - SO100 机械臂需要抓取工作空间内的方块
-    - 将方块抬升至少 0.1m 即视为成功
-    - 支持 sparse 和 dense 两种奖励模式
+    Task Description:
+    - SO100 robotic arm needs to pick up a cube within the workspace
+    - Lifting the cube at least 0.1m is considered a success
+    - Supports both sparse and dense reward modes
     """
 
     def __init__(

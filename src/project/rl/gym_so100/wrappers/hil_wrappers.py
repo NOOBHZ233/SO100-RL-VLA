@@ -160,7 +160,7 @@ class InputsControlWrapper(gym.Wrapper):
         ) = self.get_gamepad_action()
 
         if terminate_episode:
-            logging.info(f"手动结束 episode: {'成功' if success else '失败'}")
+            logging.info(f"Manually ending episode: {'success' if success else 'failure'}")
 
         if is_intervention:
             action = gamepad_action
@@ -170,7 +170,7 @@ class InputsControlWrapper(gym.Wrapper):
 
         if success:
             reward = 1.0
-            logging.info("Episode 成功结束，奖励 1.0")
+            logging.info("Episode ended successfully, reward 1.0")
 
         info["is_intervention"] = is_intervention
         info["teleop_action"] = action
@@ -200,6 +200,6 @@ class ResetDelayWrapper(gym.Wrapper):
         self.delay_seconds = delay_seconds
 
     def reset(self, **kwargs):
-        logging.info(f"重置延迟 {self.delay_seconds} 秒")
+        logging.info(f"Reset delay {self.delay_seconds} seconds")
         time.sleep(self.delay_seconds)
         return self.env.reset(**kwargs)

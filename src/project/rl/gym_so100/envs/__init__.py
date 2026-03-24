@@ -15,9 +15,9 @@
 # limitations under the License.
 
 # ================================================================
-# SO100 环境模块
+# SO100 Environment Module
 # ================================================================
-# 导出所有 SO100 机械臂相关的 Gym 环境
+# Exports all SO100 robot arm related Gym environments
 # ================================================================
 
 from gym_so100.envs.so100_pick_env import SO100PickCubeGymEnv

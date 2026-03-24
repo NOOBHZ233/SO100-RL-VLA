@@ -15,10 +15,10 @@
 # limitations under the License.
 
 # ================================================================
-# SO100 操作空间控制模块
+# SO100 Operational Space Control Module
 # ================================================================
-# 提供操作空间控制（Operational Space Control）功能
-# 适用于 SO100 机械臂的笛卡尔空间控制
+# Provides Operational Space Control functionality
+# Suitable for Cartesian space control of SO100 robotic arm
 # ================================================================
 
 from gym_so100.controllers.opspace import (

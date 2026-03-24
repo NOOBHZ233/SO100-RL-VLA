@@ -77,7 +77,7 @@ class InputController:
 
     def get_episode_end_status(self):
         status = self.episode_end_status
-        self.episode_end_status = None  # 读取后重置
+        self.episode_end_status = None  # Reset after reading
         return status
 
 
@@ -108,7 +108,7 @@ class KeyboardController(InputController):
             "backward_z": False,
             "success": False,
             "failure": False,
-            "intervention": not require_intervention_key,  # 默认激活（如果不需要干预键）
+            "intervention": not require_intervention_key,  # Activated by default if no intervention key required
             "rerecord": False,
         }
         self.listener = None
@@ -172,17 +172,17 @@ class KeyboardController(InputController):
         self.listener = keyboard.Listener(on_press=on_press, on_release=on_release)
         self.listener.start()
 
-        print("键盘控制 (SO100 机械臂):")
-        print("  方向键: XY 平面移动")
-        print("  Shift / Shift_R: Z 轴移动")
-        print("  右 Ctrl / 左 Ctrl: 打开/闭合夹爪")
-        print("  Enter: 标记 episode 成功结束")
-        print("  ESC: 标记 episode 失败结束")
+        print("Keyboard Control (SO100 Robot Arm):")
+        print("  Arrow Keys: XY plane movement")
+        print("  Shift / Shift_R: Z axis movement")
+        print("  Right Ctrl / Left Ctrl: Open/Close gripper")
+        print("  Enter: Mark episode as success")
+        print("  ESC: Mark episode as failure")
         if self.require_intervention_key:
-            print("  空格: 开始/停止干预模式")
+            print("  Space: Start/Stop intervention mode")
         else:
-            print("  控制模式: 直接激活 (无需空格)")
-        print("  R: 重新记录 episode")
+            print("  Control mode: Directly active (no space required)")
+        print("  R: Rerecord episode")
 
     def stop(self):
 

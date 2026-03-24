@@ -4,11 +4,7 @@
 
 SO100-RL-VLA 是一个专注于使用强化学习（Reinforcement Learning）训练机械臂 VLA（Visual-Language-Action）模型的项目。该项目实现了模拟到真实世界的迁移（Sim-Real Transfer），允许在模拟环境中训练的模型直接应用于真实机器人系统。
 
-！[image]assets/1773805179987.gif
-！[image]assets/1773805436832.gif
-！[image]assets/1773805483012.gif
-！[image]assets/1773805570291.gif
-！[image]assets/1773805980337.gif
+![alt text](assets/1773805179987.gif) ![alt text](assets/1773805436832.gif) ![alt text](assets/1773805483012.gif) ![alt text](assets/1773805570291.gif) ![alt text](assets/1773805980337.gif)
 ## 主要功能
 
 - **强化学习训练框架**：支持多种 RL 算法（SAC、Diffusion Policy、GROOT 等）
@@ -53,30 +49,6 @@ python -m project.rl.actor --config_path /path/to/train_so100_sim.json
 
 python -m project.rl.learner --config_path /path/to/train_so100_sim.json
 ```
-
-### 3. 模拟环境测试
-
-```bash
-# 测试预训练模型
-python scripts/evaluate.py --config-path config --config-name train_so100_sim --checkpoint /path/to/checkpoint
-
-# 或者直接运行模拟环境
-python scripts/run_env.py
-```
-
-### 4. 真实机器人控制
-
-```bash
-# 手动控制真实机器人
-python scripts/manual_control.py --config-path config --config-name manual_so100
-
-# 运行训练好的模型
-python scripts/deploy_model.py --config-path config --config-name manual_so100 --checkpoint /path/to/checkpoint
-```
-
-
-
-
 
 ## 联系方式
 

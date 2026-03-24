@@ -111,7 +111,6 @@
                 <geom class="finger_collision" name="fixed_jaw_pad_4" size="0.001 0.01 0.008" pos="0.0143 -0.0572 0"/>
                 <site name="gripper_site" pos="0 -0.08 0" size="0.005" rgba="1 0 0 0.8"/>
                 <frame name="gripper_frame" objtype="site" objname="gripper_site"/>
-                <!-- 机械爪相机 - 安装在固定爪上，朝向抓取方向 -->
                 <camera name="gripper_cam" pos="0 -0.04 0.05" euler="-1.1 0 -1.5708" fovy="60"/>
                 <body name="Moving_Jaw" pos="-0.0202 -0.0244 0" quat="1.34924e-11 -3.67321e-06 1 -3.67321e-06" >
                   <inertial pos="-0.00161745 -0.0303473 0.000449646" quat="0.696562 0.716737 -0.0239844 -0.0227026"
@@ -144,7 +143,6 @@
   </actuator>
 
   <sensor>
-    <!-- 关节位置和速度传感器 -->
     <jointpos name="so100/shoulder_pan_pos" joint="Rotation"/>
     <jointpos name="so100/shoulder_lift_pos" joint="Pitch"/>
     <jointpos name="so100/elbow_flex_pos" joint="Elbow"/>
@@ -158,8 +156,6 @@
     <jointvel name="so100/wrist_flex_vel" joint="Wrist_Pitch"/>
     <jointvel name="so100/wrist_roll_vel" joint="Wrist_Roll"/>
     <jointvel name="so100/gripper_vel" joint="Jaw"/>
-
-    <!-- 末端执行器传感器 -->
     <framepos name="so100/gripper_site_pos" objtype="site" objname="gripper_site"/>
     <framequat name="so100/gripper_quat" objtype="site" objname="gripper_site"/>
     <framelinvel name="so100/gripper_site_vel" objtype="site" objname="gripper_site"/>

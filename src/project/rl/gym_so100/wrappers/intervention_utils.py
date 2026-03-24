@@ -14,28 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# ================================================================
-# 人工干预控制器工具
-# ================================================================
-# 提供键盘、手柄等输入设备的控制接口
-# 支持人工干预、夹爪控制、episode 结束标记等功能
-# 适用于 SO100 机械臂的遥操作和人工介入训练
-# ================================================================
 
 import json
 from pathlib import Path
 
 
 def load_controller_config(controller_name: str, config_path: str | None = None) -> dict:
-    """从 JSON 文件加载控制器配置
-
-    Args:
-        controller_name: 要加载的控制器名称
-        config_path: 配置文件路径。如果为 None，使用包默认配置
-
-    Returns:
-        包含所选控制器配置的字典
-    """
     if config_path is None:
         config_path = Path(__file__).parent.parent / "controller_config.json"
 
@@ -51,10 +35,6 @@ def load_controller_config(controller_name: str, config_path: str | None = None)
 
 
 class InputController:
-    """输入控制器基类，生成运动增量
-
-    所有控制器（键盘、手柄等）的基类，定义统一的接口。
-    """
 
     def __init__(self, x_step_size=0.01, y_step_size=0.01, z_step_size=0.01):
 
@@ -68,56 +48,43 @@ class InputController:
         self.close_gripper_command = False
 
     def start(self):
-        """启动控制器并初始化资源"""
         pass
 
     def stop(self):
-        """停止控制器并释放资源"""
+
         pass
 
     def reset(self):
-        """重置控制器状态"""
+
         pass
 
     def get_deltas(self):
-        """获取当前运动增量 (dx, dy, dz)，单位：米"""
+       
         return 0.0, 0.0, 0.0
 
     def update(self):
-        """更新控制器状态 - 每帧调用一次"""
+        
         pass
 
     def __enter__(self):
-        """支持 with 语句"""
+       
         self.start()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """退出 with 块时释放资源"""
+       
         self.stop()
 
     def get_episode_end_status(self):
-        """获取当前 episode 结束状态
-
-        Returns:
-            None 表示继续，"success" 或 "failure" 表示结束
-        """
         status = self.episode_end_status
         self.episode_end_status = None  # 读取后重置
         return status
 
-    def should_intervene(self):
-        """返回是否设置了干预标志"""
+
         return self.intervention_flag
 
     def gripper_command(self):
-        """返回当前夹爪命令
-
-        Returns:
-            "open": 打开夹爪
-            "close": 闭合夹爪
-            "no-op": 无操作
-        """
+        
         if self.open_gripper_command == self.close_gripper_command:
             return "no-op"
         elif self.open_gripper_command:
@@ -127,22 +94,9 @@ class InputController:
 
 
 class KeyboardController(InputController):
-    """键盘输入控制器
-
-    使用键盘方向键和功能键控制 SO100 机械臂。
-    """
-
+    
     def __init__(self, x_step_size=0.01, y_step_size=0.01, z_step_size=0.01, require_intervention_key=False):
-        """初始化键盘控制器
-
-        Args:
-            x_step_size: X轴移动步长 (米)
-            y_step_size: Y轴移动步长 (米)
-            z_step_size: Z轴移动步长 (米)
-            require_intervention_key: 是否需要按空格键启用干预模式
-                False: 默认启用控制，无需按空格
-                True: 必须按空格键切换干预模式 (HIL 训练模式)
-        """
+    
         super().__init__(x_step_size, y_step_size, z_step_size)
         self.require_intervention_key = require_intervention_key
         self.key_states = {
@@ -160,7 +114,7 @@ class KeyboardController(InputController):
         self.listener = None
 
     def start(self):
-        """启动键盘监听器"""
+        
         from pynput import keyboard
 
         def on_press(key):
@@ -231,13 +185,13 @@ class KeyboardController(InputController):
         print("  R: 重新记录 episode")
 
     def stop(self):
-        """停止键盘监听器"""
+
         
         if self.listener and self.listener.is_alive():
             self.listener.stop()
 
     def get_deltas(self):
-        """从键盘状态获取运动增量"""
+
 
         delta_x = delta_y = delta_z = 0.0
 
@@ -257,17 +211,15 @@ class KeyboardController(InputController):
         return delta_x, delta_y, delta_z
 
     def should_save(self):
-        """如果按下 Enter 键返回 True（保存 episode）"""
-
+       
         return self.key_states["success"] or self.key_states["failure"]
 
     def should_intervene(self):
-        """如果设置干预标志返回 True"""
-
+       
         return self.key_states["intervention"]
 
     def reset(self):
-        """重置控制器状态,但保留intervention标志"""
+       
 
         intervention_state = self.key_states.get("intervention", False)
         for key in self.key_states:

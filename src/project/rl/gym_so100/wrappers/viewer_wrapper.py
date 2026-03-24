@@ -14,12 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# ================================================================
-# 被动查看器包装器
-# ================================================================
-# 自动启动 MuJoCo 被动查看器的 Gym 包装器
-# 适用于 SO100 机械臂环境
-# ================================================================
+
 
 from __future__ import annotations
 
@@ -29,14 +24,7 @@ import mujoco.viewer
 
 
 class PassiveViewerWrapper(gym.Wrapper):
-    """Gym 包装器，自动打开 MuJoCo 被动查看器
 
-    包装器在环境创建后立即启动 MuJoCo 被动模式的查看器，
-    用户无需手动使用 mujoco.viewer.launch_passive 或上下文管理器。
-
-    查看器在每次 reset 和 step 调用后保持同步，
-    环境关闭或删除时自动关闭。
-    """
 
     def __init__(
         self,
@@ -47,15 +35,7 @@ class PassiveViewerWrapper(gym.Wrapper):
         show_joint_axes: bool = False,
         joint_axes_size: float = 0.05,
     ) -> None:
-        """初始化被动查看器包装器
-
-        Args:
-            env: 要包装的 Gym 环境
-            show_left_ui: 是否显示左侧 UI 面板
-            show_right_ui: 是否显示右侧 UI 面板
-            show_joint_axes: 是否显示关节坐标轴
-            joint_axes_size: 关节坐标轴大小（米）
-        """
+        
         super().__init__(env)
 
         # 启动交互式查看器
@@ -82,46 +62,19 @@ class PassiveViewerWrapper(gym.Wrapper):
     # ==================== Gym API 重写 ====================
 
     def reset(self, **kwargs):  # type: ignore[override]
-        """重置环境并同步查看器
-
-        Returns:
-            observation: 环境观察
-            info: 额外信息字典
-        """
+       
         observation, info = self.env.reset(**kwargs)
         self._viewer.sync()
         return observation, info
 
     def step(self, action):  # type: ignore[override]
-        """执行一步并同步查看器
-
-        Args:
-            action: 动作
-
-        Returns:
-            observation: 环境观察
-            reward: 奖励
-            terminated: 是否终止
-            truncated: 是否截断
-            info: 额外信息
-        """
+        
         observation, reward, terminated, truncated, info = self.env.step(action)
         self._viewer.sync()
         return observation, reward, terminated, truncated, info
 
     def close(self) -> None:  # type: ignore[override]
-        """关闭被动查看器和底层 Gym 环境
-
-        MuJoCo 的 Renderer 在较新版本 (>= 2.3.0) 才有 close() 方法。
-        当使用旧版本 MuJoCo 时，env.unwrapped._viewer 中的渲染器实例
-        不提供此方法，导致环境关闭时 AttributeError。
-
-        为了保持版本兼容性：
-        1. 仅当渲染器暴露 close 方法时才手动清理
-        2. 从环境中移除引用，避免后续 env.close() 调用失败
-        3. 关闭此包装器的被动查看器句柄
-        4. 最后将 close() 调用转发给包装的环境，释放其他资源
-        """
+        
 
         # 1. 清理包装环境管理的渲染器（如果有）
         base_env = self.env.unwrapped  # type: ignore[attr-defined]
@@ -147,10 +100,7 @@ class PassiveViewerWrapper(gym.Wrapper):
         self.env.close()
 
     def __del__(self):
-        """析构函数，确保查看器被关闭
 
-        close() 可能在解释器关闭时抛出异常；需要保护
-        """
         if hasattr(self, "_viewer"):
             try:  # noqa: SIM105
                 self._viewer.close()

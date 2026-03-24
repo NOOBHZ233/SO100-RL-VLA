@@ -14,12 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# ================================================================
-# Gym SO100 - SO100 机械臂 Gym 环境
-# ================================================================
-# 提供 SO100 6自由度机械臂的 MuJoCo 仿真环境和 Gymnasium 接口
-# 支持操作空间控制、人工介入训练、夹爪控制等功能
-# ================================================================
 
 import gymnasium as gym
 
@@ -39,21 +33,16 @@ from gym_so100.wrappers import (
 )
 
 __all__ = [
-    # 环境类
     "SO100GymEnv",
     "SO100PickCubeGymEnv",
-    # 渲染配置
     "GymRenderingSpec",
-    # 包装器
     "EEActionWrapper",
     "GripperPenaltyWrapper",
     "InputsControlWrapper",
     "ResetDelayWrapper",
     "PassiveViewerWrapper",
-    # 控制器
     "InputController",
     "KeyboardController",
-    # 工厂函数
     "wrap_env",
     "make_base_so100_env",
     "make_so100_env_for_rollout",
@@ -61,20 +50,15 @@ __all__ = [
 
 __version__ = "0.1.0"
 
-# ================================================================
-# Gymnasium 环境注册
-# ================================================================
 
 from gymnasium.envs.registration import register
 
-# 注册 SO100 抓取方块基础环境
 register(
     id="gym_so100/SO100PickCubeBase-v0",
     entry_point="gym_so100.envs.so100_pick_env:SO100PickCubeGymEnv",
     max_episode_steps=100,
 )
 
-# 注册带被动查看器的版本
 register(
     id="gym_so100/SO100PickCubeViewer-v0",
     entry_point=lambda **kwargs: PassiveViewerWrapper(
@@ -83,7 +67,6 @@ register(
     max_episode_steps=100,
 )
 
-# 注册标准包装版本
 register(
     id="gym_so100/SO100PickCube-v0",
     entry_point="gym_so100.wrappers.factory:make_base_so100_env",
@@ -96,7 +79,6 @@ register(
     },
 )
 
-# 注册手柄控制版本
 register(
     id="gym_so100/SO100PickCubeGamepad-v0",
     entry_point="gym_so100.wrappers.factory:make_base_so100_env",
@@ -113,28 +95,26 @@ register(
     },
 )
 
-# 注册键盘控制版本
 register(
     id="gym_so100/SO100PickCubeKeyboard-v0",
     entry_point="gym_so100.wrappers.factory:make_base_so100_env",
-    max_episode_steps=100,  # 增加步数限制，避免过早结束
+    max_episode_steps=100,  
     kwargs={
         "task_name": "pick_cube",
-        "render_mode": "human",  # 使用human模式以支持PassiveViewerWrapper
-        "image_obs": True,  # 启用图像观察
+        "render_mode": "human",  
+        "image_obs": True, 
         "use_ee_action": True,
         "use_gripper": True,
         "gripper_penalty": -0.05,
         "passive_viewer": True,
         "use_input_control": True,
         "use_gamepad": False,
-        "require_intervention_key": False,  # 不需要按空格键,直接键盘控制
-        "auto_reset": True,  # 禁用自动重置，避免意外关闭
-        "reset_delay": 0.0,  # 无延迟
+        "require_intervention_key": False, 
+        "auto_reset": True, 
+        "reset_delay": 0.0, 
     },
 )
 
-# 注册用于数据采集的遥操作环境
 register(
     id="gym_so100/SO100PickCubeRollout-v0",
     entry_point="gym_so100.wrappers.factory:make_so100_env_for_rollout",

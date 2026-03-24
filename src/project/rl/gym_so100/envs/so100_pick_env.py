@@ -15,10 +15,7 @@
 # limitations under the License.
 
 # ================================================================
-# SO100 抓取方块任务环境
-# ================================================================
-# 基于 PandaPickCubeGymEnv 改编
-# 任务: 控制 SO100 机械臂抓取并抬起方块
+# SO100 Capture Block Task Environment
 # ================================================================
 
 from typing import Any, Dict, Literal, Tuple
@@ -29,16 +26,10 @@ from gymnasium import spaces
 
 from gym_so100.mujoco_gym_env import SO100GymEnv, GymRenderingSpec
 
-# SO100 Home 位置: 自然下垂姿态
-# [0°, 0°, 0°, 0°, 0°, 0] 弧度制角度
-# 所有关节保持 0 位置，机械臂自然下垂，夹爪完全闭合 不能全为0,否则进入奇异点
-# _SO100_HOME = np.asarray((0.1, 0.1, 0.1, 0.01, 0.01, 0.01))
 _SO100_HOME = np.asarray((0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
 
-# 笛卡尔空间边界 (根据 SO100 工作空间调整)
 _CARTESIAN_BOUNDS = np.asarray([[-0.2,-0.35,0.027],[0.2,-0.15,0.38]])
 
-# 方块采样边界
 _SAMPLING_BOUNDS = np.asarray([[-0.5, -0.5], [0.5, 0.5]])
 
 
@@ -89,37 +80,30 @@ class SO100PickCubeGymEnv(SO100GymEnv):
     #     self.observation_space = spaces.Dict(base_obs)
 
     def reset(self, seed=None, **kwargs) -> Tuple[Dict[str, np.ndarray], Dict[str, Any]]:
-        """重置环境
+        """Reset Environment
 
         Returns:
-            observation: 初始观察
-            info: 额外信息字典
+            observation: Initial observation
+            info: Additional Information Dictionary
         """
-        # 确保 Gymnasium 内部 RNG 被初始化
         super().reset(seed=seed)
 
-        # 重置 MuJoCo 数据
         mujoco.mj_resetData(self._model, self._data)
 
-        # 重置机械臂到 home 位置
         self.reset_robot()
 
-        # ==================== 采样新的方块位置 ====================
         if self._random_block_position:
-            # 在边界内随机采样
+
             block_xy = np.random.uniform(*_SAMPLING_BOUNDS)
             self._data.jnt("block").qpos[:3] = (*block_xy, self._block_z)
         else:
-            # 固定位置 (在采样边界内)
             block_xy = np.asarray([-0.02, -0.3])
             self._data.jnt("block").qpos[:3] = (*block_xy, self._block_z)
 
-        # 前向运动学更新
         mujoco.mj_forward(self._model, self._data)
 
-        # ==================== 缓存初始方块高度 ====================
         self._z_init = self._data.sensor("block_pos").data[2]
-        self._z_success = self._z_init + 0.1  # 成功需要抬升 0.1m
+        self._z_success = self._z_init + 0.1 
 
         obs = self._compute_observation()
         return obs, {}
@@ -177,56 +161,26 @@ class SO100PickCubeGymEnv(SO100GymEnv):
         return observation
 
     def _compute_reward(self) -> float:
-        """计算奖励
-
-        Sparse 模式:
-        - 成功抬升方块 > 0.1m: reward = 1.0
-        - 否则: reward = 0.0
-
-        Dense 模式:
-        - reward = 0.3 * r_close + 0.7 * r_lift
-        - r_close: 接近奖励 (指数衰减)
-        - r_lift: 抬升奖励 (线性)
-
-        Returns:
-            reward: 奖励值
-        """
         block_pos = self._data.sensor("block_pos").data
 
         if self.reward_type == "dense":
-            # Dense 奖励: 结合接近和抬升
             tcp_pos = self._data.sensor("so100/gripper_site_pos").data
 
-            # 接近奖励: 距离越近，奖励越高
             dist = np.linalg.norm(block_pos - tcp_pos)
             r_close = np.exp(-20 * dist)
-
-            # 抬升奖励: 抬升越高，奖励越高
             r_lift = (block_pos[2] - self._z_init) / (self._z_success - self._z_init)
             r_lift = np.clip(r_lift, 0.0, 1.0)
 
             return 0.3 * r_close + 0.7 * r_lift
         else:
-            # Sparse 奖励: 成功 = 1.0，否则 = 0.0
             lift = block_pos[2] - self._z_init
             return float(lift > 0.1)
 
     def _is_success(self) -> bool:
-        """检查任务是否成功完成
-
-        成功条件:
-        1. 末端执行器与方块距离 < 0.05m
-        2. 方块抬升高度 > 0.1m
-
-        Returns:
-            success: 是否成功
-        """
         block_pos = self._data.sensor("block_pos").data
         tcp_pos = self._data.sensor("so100/gripper_site_pos").data
 
-        # 计算末端与方块的欧氏距离
         dist = np.linalg.norm(block_pos - tcp_pos)
-        # 计算抬升高度
         lift = block_pos[2] - self._z_init
 
         return dist < 0.05 and lift > 0.1

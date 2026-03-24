@@ -1,9 +1,10 @@
 # ================================================================
-# 操作空间控制 (Operational Space Control)
+# Operational Space Control
 # ================================================================
-# 实现笛卡尔空间的操作空间控制
-# 支持位置控制、姿态控制、零空间控制、重力补偿
-# 适用于 SO100 机械臂的任务空间控制
+# Implementing operation space control in Cartesian space
+# Supports position control, attitude control, zero-space control, 
+# and gravity compensation.
+# Task space control for SO100 robotic arm
 # ================================================================
 
 from typing import Optional, Tuple, Union
@@ -13,13 +14,13 @@ import numpy as np
 
 
 def mat_to_quat(mat: np.ndarray) -> np.ndarray:
-    """将 3x3 旋转矩阵转换为四元数
-
+    """
+    Convert a 3x3 rotation matrix to a quaternion.
     Args:
-        mat: 3x3 旋转矩阵
+        mat: 3x3 rotation matrix
 
     Returns:
-        四元数 [w, x, y, z]
+        quaternion [w, x, y, z]
     """
     trace = np.trace(mat)
 
@@ -52,20 +53,16 @@ def mat_to_quat(mat: np.ndarray) -> np.ndarray:
 
 
 def quat_diff_active(source_quat: np.ndarray, target_quat: np.ndarray) -> np.ndarray:
-    """计算从源四元数到目标四元数的差值
-
+    """Calculate the difference between the current quaternion and the target quaternion.
     Args:
-        source_quat: 源四元数 [w, x, y, z]
-        target_quat: 目标四元数 [w, x, y, z]
+        source_quat: current quaternion [w, x, y, z]
+        target_quat: target quaternion [w, x, y, z]
 
     Returns:
-        表示从源到目标旋转的四元数
+        difference quaternion
     """
     # q_diff = q_target * q_source^(-1)
-    # 对于单位四元数，逆等于共轭
     source_conj = np.array([source_quat[0], -source_quat[1], -source_quat[2], -source_quat[3]])
-
-    # 四元数乘法: q1 * q2
     w1, x1, y1, z1 = target_quat
     w2, x2, y2, z2 = source_conj
 
@@ -78,17 +75,16 @@ def quat_diff_active(source_quat: np.ndarray, target_quat: np.ndarray) -> np.nda
 
 
 def quat_to_axisangle(quat: np.ndarray) -> np.ndarray:
-    """将四元数转换为轴角表示
+    """Convert quaternions to axis-angle representation
 
     Args:
-        quat: 四元数 [w, x, y, z]
+        quat: quaternion [w, x, y, z]
 
     Returns:
-        轴角向量 (角度 * 轴)
+        Axis-angle vector (angle * axis)
     """
     w, x, y, z = quat
 
-    # 归一化四元数
     norm = np.sqrt(w * w + x * x + y * y + z * z)
     if norm < 1e-10:
         return np.zeros(3)
@@ -98,19 +94,15 @@ def quat_to_axisangle(quat: np.ndarray) -> np.ndarray:
     y /= norm
     z /= norm
 
-    # 计算角度
     angle = 2.0 * np.arccos(np.clip(w, -1.0, 1.0))
 
-    # 计算轴
     sin_half_angle = np.sqrt(1.0 - w * w)
 
     if sin_half_angle < 1e-10:
-        # 小角度，任意轴
         return np.array([angle * x, angle * y, angle * z])
 
     axis = np.array([x, y, z]) / sin_half_angle
 
-    # 返回轴角向量
     return angle * axis
 
 
@@ -121,27 +113,24 @@ def pd_control(
     kp_kv: np.ndarray,
     ddx_max: float = 0.0,
 ) -> np.ndarray:
-    """PD 控制器
+    """PD controller
 
     Args:
-        x: 当前位置
-        x_des: 目标位置
-        dx: 当前速度
-        kp_kv: PD 增益 [kp, kd]
-        ddx_max: 最大加速度限制
+        x: current pos
+        x_des: target pos
+        dx: current vel
+        kp_kv: PD gain [kp, kd]
+        ddx_max: acc limited
 
     Returns:
-        控制指令
+        command
     """
-    # 计算误差
     x_err = x - x_des
     dx_err = dx
 
-    # 应用增益
     x_err *= -kp_kv[:, 0]
     dx_err *= -kp_kv[:, 1]
 
-    # 限制最大误差
     if ddx_max > 0.0:
         x_err_sq_norm = np.sum(x_err**2)
         ddx_max_sq = ddx_max**2
@@ -158,28 +147,25 @@ def pd_control_orientation(
     kp_kv: np.ndarray,
     dw_max: float = 0.0,
 ) -> np.ndarray:
-    """姿态 PD 控制器 低通滤波
+    """Attitude PD controller low-pass filter
 
     Args:
-        quat: 当前姿态四元数
-        quat_des: 目标姿态四元数
-        w: 当前角速度
-        kp_kv: PD 增益 [kp, kd]
-        dw_max: 最大角加速度限制
+        quat: current quaternion
+        quat_des: target quaternino
+        w: Current angular velocity
+        kp_kv: PD gain [kp, kd]
+        dw_max: Maximum angular acceleration limit
 
     Returns:
-        姿态控制指令
+        Attitude control commands
     """
-    # 计算误差
     quat_err = quat_diff_active(source_quat=quat_des, target_quat=quat)
     ori_err = quat_to_axisangle(quat_err)
     w_err = w
 
-    # 应用增益
     ori_err *= -kp_kv[:, 0]
     w_err *= -kp_kv[:, 1]
 
-    # 限制最大误差
     if dw_max > 0.0:
         ori_err_sq_norm = np.sum(ori_err**2)
         dw_max_sq = dw_max**2
@@ -205,14 +191,12 @@ def opspace(
     max_ori_acceleration: Optional[float] = None,
     gravity_comp: bool = True,
 ) -> np.ndarray:
-    """修复版：操作空间控制器"""
+    """main function"""
     x_des = data.site_xpos[site_id] if pos is None else np.asarray(pos)
     q_des = data.qpos[dof_ids] if joint is None else np.asarray(joint)
 
-    # 标志位：是否执行 6D 位姿控制
     control_ori = ori is not None
 
-    # 初始化增益
     kp_pos = np.asarray(pos_gains)
     kd_pos = damping_ratio * 2 * np.sqrt(kp_pos)
     kp_kv_pos = np.stack([kp_pos, kd_pos], axis=-1)
@@ -224,31 +208,24 @@ def opspace(
     ddx_max = max_pos_acceleration if max_pos_acceleration is not None else 0.0
     dw_max = max_ori_acceleration if max_ori_acceleration is not None else 0.0
 
-    # 获取当前关节状态
     q = data.qpos[dof_ids]
     dq = data.qvel[dof_ids]
-
-    # 获取完整雅可比矩阵
     J_v_full = np.zeros((3, model.nv), dtype=np.float64)
     J_w_full = np.zeros((3, model.nv), dtype=np.float64)
     mujoco.mj_jacSite(model, data, J_v_full, J_w_full, site_id)
-    
-    # 切片提取所需自由度
+
     J_v = J_v_full[:, dof_ids]
     
-    # 核心修复 1：动态组装雅可比矩阵 (3D 平移 vs 6D 位姿)
     if control_ori:
         J_w = J_w_full[:, dof_ids]
-        J = np.concatenate([J_v, J_w], axis=0) # 6 x N 矩阵
+        J = np.concatenate([J_v, J_w], axis=0) # 6 x N 
     else:
-        J = J_v # 3 x N 矩阵 (对于5DOF机械臂，3x5矩阵是满秩的！)
+        J = J_v # 3 x N 
 
-    # 1. 计算位置 PD 加速度
     x = data.site_xpos[site_id]
     dx = J_v @ dq
     ddx = pd_control(x=x, x_des=x_des, dx=dx, kp_kv=kp_kv_pos, ddx_max=ddx_max)
 
-    # 2. 如果需要，计算姿态 PD 加速度
     if control_ori:
         kp_ori = np.asarray(ori_gains)
         kd_ori = damping_ratio * 2 * np.sqrt(kp_ori)

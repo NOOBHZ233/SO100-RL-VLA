@@ -1,23 +1,37 @@
 # SO100-RL-VLA
 
-## 项目概述
+## Overview
 
-SO100-RL-VLA 是一个专注于使用强化学习（Reinforcement Learning）训练机械臂 VLA（Visual-Language-Action）模型的项目。该项目实现了模拟到真实世界的迁移（Sim-Real Transfer），允许在模拟环境中训练的模型直接应用于真实机器人系统。
+SO100-RL-VLA is a project focused on training Visual-Language-Action (VLA) models for robotic arms using reinforcement learning. This project achieves Sim2Real Transfer, allowing models trained in a simulation environment to be directly applied to real robotic systems.This project, based on the Lerobot framework, open-sources the SO100 RL training environment. Training tasks can be modified via src/project/rl/gym_so100, making it highly versatile.
 
-![alt text](assets/1773805179987.gif) ![alt text](assets/1773805436832.gif) ![alt text](assets/1773805483012.gif) ![alt text](assets/1773805570291.gif) ![alt text](assets/1773805980337.gif)
-## 主要功能
+### Sim Train
+![alt text](assets/1773805179987.gif)
 
-- **强化学习训练框架**：支持多种 RL 算法（SAC、Diffusion Policy、GROOT 等）
-- **模拟环境**：基于 Gym 和 Mujoco 的 SO100 机械臂模拟环境
-- **真实机器人控制**：支持 SO100 机械臂硬件控制
-- **视觉处理**：集成了相机系统（Realsense、OpenCV）和图像处理管道
-- **数据采集与处理**：提供数据集处理、视频录制和转换工具
-- **模型部署**：支持在真实机器人上部署训练好的模型
-- **混合现实交互**：支持人与机器人的混合控制（HIL - Human-in-the-Loop）
+### Real Test
+![alt text](assets/1773805436832.gif)
 
-## 环境安装
+### Generalization test
+![alt text](assets/1773805570291.gif)
 
-### 使用 Conda（推荐）
+## Main Function
+
+- **Reinforcement Learning Training Framework:** Supports multiple RL algorithms (SAC, Diffusion Policy, GROOT, etc.)
+
+- **Simulation Environment:** SO100 robotic arm simulation environment based on Gym and Mujoco
+
+- **Realistic Robot Control:** Supports SO100 robotic arm hardware control
+
+- **Vision Processing:** Integrates camera systems (Realsense, OpenCV) and image processing pipelines
+
+- **Data Acquisition and Processing:** Provides dataset processing, video recording, and conversion tools
+
+- **Model Deployment:** Supports deploying pre-trained models on real robots
+
+- **Mixed Reality Interaction:** Supports human-in-the-Loop (HIL) control between humans and robots
+
+## Environmental installation
+
+### Conda（recommend）
 
 ```bash
 conda env create -f environment.yml
@@ -27,16 +41,14 @@ conda activate so100-rl-vla
 pip install -e .
 ```
 
-## 快速开始
+## Quick Start
 
-### 1. 配置文件
+### 1. Configs
 
-项目使用 Hydra 进行配置管理，主要配置文件位于 `config/` 目录：
+- `train_so100_sim.json`：Simulated environment training configuration
+- `manual_so100.json`：Real robot manual control configuration
 
-- `train_so100_sim.json`：模拟环境训练配置
-- `manual_so100.json`：真实机器人手动控制配置
-
-### 2. 训练模型
+### 2. Train model
 
 ```bash
 python -m project.rl.gym_manipulator --config_path path/to/manual_so100.json
@@ -50,13 +62,16 @@ python -m project.rl.actor --config_path /path/to/train_so100_sim.json
 python -m project.rl.learner --config_path /path/to/train_so100_sim.json
 ```
 
-## 联系方式
+## Author
 
-如有问题或建议，请通过以下方式联系：
-
-- 提交 Issue
-- 发送邮件至项目维护者
-- 加入项目 Slack 频道
+Chengwei Zhang
+QQ: 2017809834
+Email: ZhangCW233666@163.com 
 
 ---
+
+## Statement
+Due to confidentiality principles, the open-source SO100 robotic arm was used instead.
+This project primarily targets open-source training Sim environments.
+The model trained in sim can be inserted into the Lerobot inference framework for both sim and real-world testing.
 

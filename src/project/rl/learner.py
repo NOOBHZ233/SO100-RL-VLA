@@ -242,13 +242,13 @@ def start_learner_threads(
     )
     logging.info("[LEARNER] Training process stopped")
 
+    communication_process.join()
+    logging.info("[LEARNER] Communication process joined")
+
     logging.info("[LEARNER] Closing queues")
     transition_queue.close()
     interaction_message_queue.close()
     parameters_queue.close()
-
-    communication_process.join()
-    logging.info("[LEARNER] Communication process joined")
 
     logging.info("[LEARNER] join queues")
     transition_queue.cancel_join_thread()

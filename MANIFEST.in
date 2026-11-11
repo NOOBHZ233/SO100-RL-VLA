@@ -1,0 +1,9 @@
+include environment.yml
+include README.zh-CN.md
+recursive-include config *.json
+recursive-include requirements *.txt *.md
+recursive-include docs *.md *.yml
+recursive-include tests *.py
+recursive-include scripts *.sh
+recursive-include assets *.svg
+recursive-exclude * __pycache__ *py[cod]

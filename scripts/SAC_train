@@ -1,3 +1,4 @@
-python -m project.rl.actor --config_path /path/to/train_so100_sim.json
-
-python -m project.rl.learner --config_path /path/to/train_so100_sim.json
+#!/usr/bin/env bash
+# Compatibility entry point. Start learner and actor in separate terminals.
+set -euo pipefail
+exec bash "$(dirname -- "${BASH_SOURCE[0]}")/train_sim.sh" "$@"

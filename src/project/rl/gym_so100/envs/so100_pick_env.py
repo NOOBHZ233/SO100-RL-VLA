@@ -24,7 +24,7 @@ import mujoco
 import numpy as np
 from gymnasium import spaces
 
-from gym_so100.mujoco_gym_env import SO100GymEnv, GymRenderingSpec
+from project.rl.gym_so100.mujoco_gym_env import SO100GymEnv, GymRenderingSpec
 
 _SO100_HOME = np.asarray((0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
 
@@ -94,7 +94,7 @@ class SO100PickCubeGymEnv(SO100GymEnv):
 
         if self._random_block_position:
 
-            block_xy = np.random.uniform(*_SAMPLING_BOUNDS)
+            block_xy = self.np_random.uniform(*_SAMPLING_BOUNDS)
             self._data.jnt("block").qpos[:3] = (*block_xy, self._block_z)
         else:
             block_xy = np.asarray([-0.02, -0.3])
@@ -187,7 +187,7 @@ class SO100PickCubeGymEnv(SO100GymEnv):
 
 
 if __name__ == "__main__":
-    from gym_so100.wrappers.viewer_wrapper import PassiveViewerWrapper
+    from project.rl.gym_so100.wrappers.viewer_wrapper import PassiveViewerWrapper
 
     env = SO100PickCubeGymEnv(render_mode="human")
     env = PassiveViewerWrapper(env)

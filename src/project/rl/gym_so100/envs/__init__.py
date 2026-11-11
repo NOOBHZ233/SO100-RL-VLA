@@ -20,6 +20,6 @@
 # Exports all SO100 robot arm related Gym environments
 # ================================================================
 
-from gym_so100.envs.so100_pick_env import SO100PickCubeGymEnv
+from project.rl.gym_so100.envs.so100_pick_env import SO100PickCubeGymEnv
 
 __all__ = ["SO100PickCubeGymEnv"]

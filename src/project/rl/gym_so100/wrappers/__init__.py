@@ -16,25 +16,23 @@
 
 
 
-from gym_so100.wrappers.factory import (
+from project.rl.gym_so100.wrappers.factory import (
     make_base_so100_env,
     make_so100_env_for_rollout,
     wrap_env,
 )
-from gym_so100.wrappers.hil_wrappers import (
+from project.rl.gym_so100.wrappers.hil_wrappers import (
     EEActionWrapper,
     GripperPenaltyWrapper,
     InputsControlWrapper,
     ResetDelayWrapper,
 )
-from gym_so100.wrappers.intervention_utils import (
-    GamepadController,
-    GamepadControllerHID,
+from project.rl.gym_so100.wrappers.intervention_utils import (
     InputController,
     KeyboardController,
     load_controller_config,
 )
-from gym_so100.wrappers.viewer_wrapper import PassiveViewerWrapper
+from project.rl.gym_so100.wrappers.viewer_wrapper import PassiveViewerWrapper
 
 __all__ = [
     "wrap_env",
@@ -47,7 +45,5 @@ __all__ = [
     "PassiveViewerWrapper",
     "InputController",
     "KeyboardController",
-    "GamepadController",
-    "GamepadControllerHID",
     "load_controller_config",
 ]

@@ -43,13 +43,13 @@ def wrap_env(
     passive_viewer: bool = False,
     from_pixels: bool = False,
 ) -> gym.Wrapper:
-    from gym_so100.wrappers.hil_wrappers import (
+    from project.rl.gym_so100.wrappers.hil_wrappers import (
         EEActionWrapper,
         GripperPenaltyWrapper,
         InputsControlWrapper,
         ResetDelayWrapper,
     )
-    from gym_so100.wrappers.viewer_wrapper import PassiveViewerWrapper
+    from project.rl.gym_so100.wrappers.viewer_wrapper import PassiveViewerWrapper
 
     if passive_viewer:
         env = PassiveViewerWrapper(env)
@@ -107,7 +107,8 @@ def make_base_so100_env(
     seed: int = 0,
 ) -> gym.Env:
 
-    import gym_so100
+    import project.rl.gym_so100
+    from project.rl.gym_so100.mujoco_gym_env import GymRenderingSpec
 
     if task_name == "pick_cube":
         env = gym.make(
@@ -115,6 +116,7 @@ def make_base_so100_env(
             render_mode=render_mode,
             image_obs=image_obs,
             seed=seed,
+            render_spec=GymRenderingSpec(width=width, height=height),
         )
     elif task_name == "reach":
         raise NotImplementedError(f"Task '{task_name}' not yet implemented")

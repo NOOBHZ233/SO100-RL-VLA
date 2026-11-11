@@ -327,9 +327,7 @@ def make_robot_env(cfg: HILSerlRobotEnvConfig) -> tuple[gym.Env, Any]:
 
     if cfg.name == "gym_so100" :
         assert cfg.robot is None and cfg.teleop is None, "GymHIL environment does not support robot or teleop"
-        import sys
-        sys.path.insert(0, "/home/zcw/SO100-RL/RL/mycode")
-        import gym_so100  # noqa: F401
+        import project.rl.gym_so100  # noqa: F401
 
         # Extract gripper settings with defaults
         use_gripper = cfg.processor.gripper.use_gripper if cfg.processor.gripper is not None else True
@@ -337,7 +335,9 @@ def make_robot_env(cfg: HILSerlRobotEnvConfig) -> tuple[gym.Env, Any]:
 
         env = gym.make(
             f"gym_so100/{cfg.task}",
-            # 不指定render_mode,让环境使用默认配置(human模式用于PassiveViewerWrapper)
+            image_obs=True,
+            use_gripper=use_gripper,
+            gripper_penalty=gripper_penalty,
         )
 
         return env, None
@@ -572,11 +572,22 @@ def step_env_and_process_transition(
     processed_action = processed_action_transition[TransitionKey.ACTION]
 
     obs, reward, terminated, truncated, info = env.step(processed_action)
+    for event in TeleopEvents:
+        if event.value in info:
+            info[event] = info[event.value]
 
     reward = reward + processed_action_transition[TransitionKey.REWARD]
     terminated = terminated or processed_action_transition[TransitionKey.DONE]
     truncated = truncated or processed_action_transition[TransitionKey.TRUNCATED]
     complementary_data = processed_action_transition[TransitionKey.COMPLEMENTARY_DATA].copy()
+    # Simulation input wrappers may override the policy action inside env.step.
+    # Store the action actually executed, so recorded data and replay agree.
+    if "teleop_action" in info:
+        complementary_data["teleop_action"] = torch.as_tensor(
+            info["teleop_action"], dtype=action.dtype, device=action.device
+        ).reshape_as(action)
+    if "discrete_penalty" in info:
+        complementary_data["discrete_penalty"] = info["discrete_penalty"]
     new_info = processed_action_transition[TransitionKey.INFO].copy()
     new_info.update(info)
 
@@ -636,7 +647,11 @@ def control_loop(
 
     dataset = None
     if cfg.mode == "record":
-        action_features = teleop_device.action_features
+        action_features = (
+            teleop_device.action_features
+            if teleop_device is not None
+            else {"dtype": "float32", "shape": env.action_space.shape, "names": None}
+        )
         features = {
             ACTION: action_features,
             REWARD: {"dtype": "float32", "shape": (1,), "names": None},
@@ -709,7 +724,7 @@ def control_loop(
             )
             frame = {
                 **observations,
-                ACTION: action_to_record.cpu(),
+                ACTION: action_to_record.squeeze(0).cpu(),
                 REWARD: np.array([transition[TransitionKey.REWARD]], dtype=np.float32),
                 DONE: np.array([terminated or truncated], dtype=bool),
             }
@@ -752,9 +767,11 @@ def control_loop(
         # Maintain fps timing
         precise_sleep(max(dt - (time.perf_counter() - step_start_time), 0.0))
 
-    if dataset is not None and cfg.dataset.push_to_hub:
-        logging.info("Pushing dataset to hub")
-        dataset.push_to_hub()
+    if dataset is not None:
+        dataset.finalize()
+        if cfg.dataset.push_to_hub:
+            logging.info("Pushing dataset to hub")
+            dataset.push_to_hub()
 
 
 def replay_trajectory(
@@ -778,7 +795,7 @@ def replay_trajectory(
         start_time = time.perf_counter()
         transition = create_transition(
             observation=env.get_raw_joint_positions() if hasattr(env, "get_raw_joint_positions") else {},
-            action=action_data[ACTION],
+            action=torch.as_tensor(action_data[ACTION], dtype=torch.float32, device=cfg.device).unsqueeze(0),
         )
         transition = action_processor(transition)
         env.step(transition[TransitionKey.ACTION])
@@ -796,11 +813,13 @@ def main(cfg: GymManipulatorConfig) -> None:
     print("Environment processor:", env_processor)
     print("Action processor:", action_processor)
 
-    if cfg.mode == "replay":
-        replay_trajectory(env, action_processor, cfg)
-        exit()
-
-    control_loop(env, env_processor, action_processor, teleop_device, cfg)
+    try:
+        if cfg.mode == "replay":
+            replay_trajectory(env, action_processor, cfg)
+        else:
+            control_loop(env, env_processor, action_processor, teleop_device, cfg)
+    finally:
+        env.close()
 
 
 if __name__ == "__main__":

@@ -30,7 +30,7 @@ import mujoco
 import numpy as np
 from gymnasium import spaces
 
-from gym_so100.controllers import opspace
+from project.rl.gym_so100.controllers import opspace
 
 # Maximum gripper control command value (corresponds to fully closed)
 MAX_GRIPPER_COMMAND = 255
@@ -140,6 +140,7 @@ class MujocoGymEnv(gym.Env):
 
 
 class SO100GymEnv(MujocoGymEnv):
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 10}
 
     def __init__(
         self,

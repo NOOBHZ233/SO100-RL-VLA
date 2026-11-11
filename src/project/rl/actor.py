@@ -224,21 +224,24 @@ def actor_cli(cfg: TrainRLServerPipelineConfig):
     # 创建接收策略参数的进程/线程
     receive_policy_process = concurrency_entity(
         target=receive_policy,
-        args=(cfg, parameters_queue, shutdown_event, grpc_channel),
+        args=(cfg, parameters_queue, shutdown_event),
+        kwargs={"learner_client": learner_client if is_threaded else None, "grpc_channel": grpc_channel},
         daemon=True,
     )
 
     # 创建发送转换数据的进程/线程
     transitions_process = concurrency_entity(
         target=send_transitions,
-        args=(cfg, transitions_queue, shutdown_event, grpc_channel),
+        args=(cfg, transitions_queue, shutdown_event),
+        kwargs={"learner_client": learner_client if is_threaded else None, "grpc_channel": grpc_channel},
         daemon=True,
     )
 
     # 创建发送统计数据的进程/线程
     interactions_process = concurrency_entity(
         target=send_interactions,
-        args=(cfg, interactions_queue, shutdown_event, grpc_channel),
+        args=(cfg, interactions_queue, shutdown_event),
+        kwargs={"learner_client": learner_client if is_threaded else None, "grpc_channel": grpc_channel},
         daemon=True,
     )
 
@@ -248,20 +251,24 @@ def actor_cli(cfg: TrainRLServerPipelineConfig):
     receive_policy_process.start()
 
     # 启动主执行循环（在当前进程中运行）
-    act_with_policy(
-        cfg=cfg,
-        shutdown_event=shutdown_event,
-        parameters_queue=parameters_queue,
-        transitions_queue=transitions_queue,
-        interactions_queue=interactions_queue,
-    )
+    try:
+        act_with_policy(
+            cfg=cfg,
+            shutdown_event=shutdown_event,
+            parameters_queue=parameters_queue,
+            transitions_queue=transitions_queue,
+            interactions_queue=interactions_queue,
+        )
+        # Drain pending messages before stopping the parameter receiver.
+        transitions_queue.put(None)
+        interactions_queue.put(None)
+        transitions_process.join(timeout=10)
+        interactions_process.join(timeout=10)
+    finally:
+        shutdown_event.set()
+        if grpc_channel is not None:
+            grpc_channel.close()
     logging.info("[ACTOR] Policy process joined")
-
-    # 清理资源：关闭队列
-    logging.info("[ACTOR] Closing queues")
-    transitions_queue.close()
-    interactions_queue.close()
-    parameters_queue.close()
 
     # 等待所有通信进程结束
     transitions_process.join()
@@ -270,6 +277,11 @@ def actor_cli(cfg: TrainRLServerPipelineConfig):
     logging.info("[ACTOR] Interactions process joined")
     receive_policy_process.join()
     logging.info("[ACTOR] Receive policy process joined")
+
+    logging.info("[ACTOR] Closing queues")
+    transitions_queue.close()
+    interactions_queue.close()
+    parameters_queue.close()
 
     logging.info("[ACTOR] join queues")
     transitions_queue.cancel_join_thread()
@@ -361,7 +373,7 @@ def act_with_policy(
     assert isinstance(policy, nn.Module)
 
     # 重置环境，获取初始观察
-    obs, info = online_env.reset()
+    obs, info = online_env.reset(seed=cfg.seed)
     env_processor.reset()
     action_processor.reset()
 
@@ -530,6 +542,13 @@ def act_with_policy(
             dt_time = time.perf_counter() - start_time
             precise_sleep(max(1 / cfg.env.fps - dt_time, 0.0))
 
+    if list_transition_to_send_to_learner:
+        push_transitions_to_transport_queue(
+            transitions=list_transition_to_send_to_learner,
+            transitions_queue=transitions_queue,
+        )
+    online_env.close()
+
 
 # ============================================================================
 # 通信函数 - gRPC 和消息传递相关函数
@@ -685,7 +704,8 @@ def receive_policy(
         )
 
     except grpc.RpcError as e:
-        logging.error(f"[ACTOR] gRPC error: {e}")
+        if not shutdown_event.is_set():
+            logging.error(f"[ACTOR] gRPC error: {e}")
 
     # 多进程模式下，关闭 gRPC 通道
     if not use_threads(cfg):
@@ -741,7 +761,8 @@ def send_transitions(
             )
         )
     except grpc.RpcError as e:
-        logging.error(f"[ACTOR] gRPC error: {e}")
+        if not shutdown_event.is_set():
+            logging.error(f"[ACTOR] gRPC error: {e}")
 
     logging.info("[ACTOR] Finished streaming transitions")
 
@@ -808,7 +829,8 @@ def send_interactions(
             )
         )
     except grpc.RpcError as e:
-        logging.error(f"[ACTOR] gRPC error: {e}")
+        if not shutdown_event.is_set():
+            logging.error(f"[ACTOR] gRPC error: {e}")
 
     logging.info("[ACTOR] Finished streaming interactions")
 
@@ -836,6 +858,9 @@ def transitions_stream(shutdown_event: Event, transitions_queue: Queue, timeout:
         except Empty:
             logging.debug("[ACTOR] Transition queue is empty")
             continue
+
+        if message is None:
+            break
 
         # 分块发送大数据
         yield from send_bytes_in_chunks(
@@ -867,6 +892,9 @@ def interactions_stream(
         except Empty:
             logging.debug("[ACTOR] Interaction queue is empty")
             continue
+
+        if message is None:
+            break
 
         # 分块发送数据
         yield from send_bytes_in_chunks(

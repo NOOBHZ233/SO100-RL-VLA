@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-labelledby="title desc">
+  <title id="title">SO100 · RL · VLA</title>
+  <desc id="desc">An open simulation playground for robot learning. A schematic SO100 arm connects simulation, learning, and deployment.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101a2b"/><stop offset="1" stop-color="#080d16"/></linearGradient>
+    <linearGradient id="arm" x2="1" y2="1"><stop stop-color="#ffba70"/><stop offset="1" stop-color="#ff743d"/></linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" fill="none" stroke="#9db2cd" stroke-opacity=".07"/></pattern>
+  </defs>
+  <rect width="1280" height="400" rx="20" fill="url(#bg)"/>
+  <rect width="1280" height="400" rx="20" fill="url(#grid)"/>
+  <path d="M700 0V400" stroke="#263448"/>
+  <circle cx="984" cy="194" r="145" fill="#ff914d" fill-opacity=".035" stroke="#ff914d" stroke-opacity=".15"/>
+  <circle cx="984" cy="194" r="112" fill="none" stroke="#304157" stroke-dasharray="4 9"/>
+  <g font-family="Inter,Segoe UI,Arial,sans-serif">
+    <rect x="52" y="46" width="182" height="28" rx="14" fill="#ff914d" fill-opacity=".12" stroke="#ff914d" stroke-opacity=".35"/>
+    <circle cx="69" cy="60" r="3" fill="#ffa762"/>
+    <text x="82" y="65" fill="#ffba7b" font-size="11" font-weight="700" letter-spacing="1.8">OPEN ROBOT LEARNING</text>
+    <text x="48" y="158" fill="#f1f5fa" font-size="64" font-weight="800" letter-spacing="-2.5">SO100<tspan fill="#ff9b57"> · </tspan>RL · VLA</text>
+    <text x="52" y="207" fill="#d8e2ed" font-size="25" font-weight="400">From simulation to manipulation.</text>
+    <text x="52" y="245" fill="#8fa4bc" font-size="16">MuJoCo environments. Visual SAC. Human-in-the-loop control.</text>
+    <g fill="#c1cfdd" font-size="12" font-weight="600" letter-spacing="1.5">
+      <text x="52" y="337">SIMULATE</text><text x="228" y="337">LEARN</text><text x="374" y="337">TRANSFER</text>
+    </g>
+    <g stroke="#5a6c82" fill="none"><path d="M154 332h40m-5-4 5 4-5 4"/><path d="M302 332h38m-5-4 5 4-5 4"/></g>
+    <g fill="#8298b1" font-size="11" letter-spacing="2"><text x="744" y="45">SO100 / MANIPULATION LAB</text><text x="744" y="365">5 ARM JOINTS + GRIPPER</text></g>
+    <text x="1111" y="365" fill="#ffb274" font-size="11" letter-spacing="1">SIM → REAL</text>
+  </g>
+  <g fill="none" stroke="#3f536b" stroke-width="1"><path d="m783 317 195-66 228 72-195 59z"/><path d="m826 303 185 59m-137-75 185 59m-137-75 185 59m-231-17 185-62m-136 78 185-63"/></g>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M915 304v-70l75-99 83 60" stroke="#253247" stroke-width="36"/>
+    <path d="M915 304v-70l75-99 83 60" stroke="url(#arm)" stroke-width="22"/>
+    <path d="M915 304v-70l75-99 83 60" stroke="#ffd0a1" stroke-width="2" stroke-opacity=".65"/>
+    <path d="m1073 195 30 27" stroke="#74869d" stroke-width="17"/>
+    <path d="m1102 218 21-10 18 16m-43 0-6 24 19 15" stroke="#ffab66" stroke-width="7"/>
+    <path d="m1119 244-2 41" stroke="#91d9d2" stroke-width="1" stroke-dasharray="3 5"/>
+    <path d="m891 309 25-9 28 9v13l-26 9-27-9z" fill="#2c3e53" stroke="#8b9ab0" stroke-width="2"/>
+    <path d="m1106 292 20-7 17 7v19l-19 7-18-7z" fill="#70c4c0" fill-opacity=".25" stroke="#91d9d2" stroke-width="2"/>
+  </g>
+  <g fill="#172337" stroke="#ffb879" stroke-width="3"><circle cx="915" cy="234" r="15"/><circle cx="990" cy="135" r="15"/><circle cx="1073" cy="195" r="12"/></g>
+  <g fill="#ffb879"><circle cx="915" cy="234" r="4"/><circle cx="990" cy="135" r="4"/><circle cx="1073" cy="195" r="3"/></g>
+</svg>

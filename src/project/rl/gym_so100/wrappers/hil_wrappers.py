@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
 import logging
-import sys
 import time
 
 import gymnasium as gym
 import numpy as np
 
-from gym_so100.mujoco_gym_env import MAX_GRIPPER_COMMAND
 
 DEFAULT_EE_STEP_SIZE = {"x": 0.025, "y": 0.025, "z": 0.025}
 
@@ -20,7 +18,7 @@ class GripperPenaltyWrapper(gym.Wrapper):
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
-        self.last_gripper_pos = self.unwrapped.get_gripper_pose() / MAX_GRIPPER_COMMAND
+        self.last_gripper_pos = self.unwrapped.get_gripper_pose()
         return obs, info
 
     def step(self, action):
@@ -30,7 +28,7 @@ class GripperPenaltyWrapper(gym.Wrapper):
             action[-1] > 0.5 and self.last_gripper_pos < 0.1
         ):
             info["discrete_penalty"] = self.penalty
-        self.last_gripper_pos = self.unwrapped.get_gripper_pose() / MAX_GRIPPER_COMMAND
+        self.last_gripper_pos = self.unwrapped.get_gripper_pose()
         return observation, reward, terminated, truncated, info
 
 
@@ -49,8 +47,8 @@ class EEActionWrapper(gym.Wrapper):
         )
 
         num_actions = 4 if use_gripper else 3
-        action_space_bounds_min = -np.ones(num_actions)
-        action_space_bounds_max = np.ones(num_actions)
+        action_space_bounds_min = -np.ones(num_actions, dtype=np.float32)
+        action_space_bounds_max = np.ones(num_actions, dtype=np.float32)
 
         ee_action_space = gym.spaces.Box(
             low=action_space_bounds_min,
@@ -88,26 +86,13 @@ class InputsControlWrapper(gym.Wrapper):
         require_intervention_key=False,
     ):
         super().__init__(env)
-        from gym_so100.wrappers.intervention_utils import (
-            GamepadController,
-            GamepadControllerHID,
-            KeyboardController,
-        )
+        from project.rl.gym_so100.wrappers.intervention_utils import KeyboardController
 
         if use_gamepad:
-            if sys.platform == "darwin":
-                self.controller = GamepadControllerHID(
-                    x_step_size=x_step_size,
-                    y_step_size=y_step_size,
-                    z_step_size=z_step_size,
-                )
-            else:
-                self.controller = GamepadController(
-                    x_step_size=x_step_size,
-                    y_step_size=y_step_size,
-                    z_step_size=z_step_size,
-                    config_path=controller_config_path,
-                )
+            raise NotImplementedError(
+                "Gamepad drivers are not included. Use SO100PickCubeKeyboard-v0 "
+                "for manual control or SO100PickCube-v0 for headless training."
+            )
         else:
             self.controller = KeyboardController(
                 x_step_size=x_step_size,

@@ -21,7 +21,7 @@
 # Suitable for Cartesian space control of SO100 robotic arm
 # ================================================================
 
-from gym_so100.controllers.opspace import (
+from project.rl.gym_so100.controllers.opspace import (
     mat_to_quat,
     opspace,
     pd_control,

@@ -17,9 +17,9 @@
 
 import gymnasium as gym
 
-from gym_so100.envs import SO100PickCubeGymEnv
-from gym_so100.mujoco_gym_env import SO100GymEnv, GymRenderingSpec
-from gym_so100.wrappers import (
+from project.rl.gym_so100.envs import SO100PickCubeGymEnv
+from project.rl.gym_so100.mujoco_gym_env import SO100GymEnv, GymRenderingSpec
+from project.rl.gym_so100.wrappers import (
     EEActionWrapper,
     GripperPenaltyWrapper,
     InputController,
@@ -55,7 +55,7 @@ from gymnasium.envs.registration import register
 
 register(
     id="gym_so100/SO100PickCubeBase-v0",
-    entry_point="gym_so100.envs.so100_pick_env:SO100PickCubeGymEnv",
+    entry_point="project.rl.gym_so100.envs.so100_pick_env:SO100PickCubeGymEnv",
     max_episode_steps=100,
 )
 
@@ -69,7 +69,7 @@ register(
 
 register(
     id="gym_so100/SO100PickCube-v0",
-    entry_point="gym_so100.wrappers.factory:make_base_so100_env",
+    entry_point="project.rl.gym_so100.wrappers.factory:make_base_so100_env",
     max_episode_steps=100,
     kwargs={
         "task_name": "pick_cube",
@@ -81,7 +81,7 @@ register(
 
 register(
     id="gym_so100/SO100PickCubeGamepad-v0",
-    entry_point="gym_so100.wrappers.factory:make_base_so100_env",
+    entry_point="project.rl.gym_so100.wrappers.factory:make_base_so100_env",
     max_episode_steps=100,
     kwargs={
         "task_name": "pick_cube",
@@ -97,7 +97,7 @@ register(
 
 register(
     id="gym_so100/SO100PickCubeKeyboard-v0",
-    entry_point="gym_so100.wrappers.factory:make_base_so100_env",
+    entry_point="project.rl.gym_so100.wrappers.factory:make_base_so100_env",
     max_episode_steps=100,  
     kwargs={
         "task_name": "pick_cube",
@@ -117,7 +117,7 @@ register(
 
 register(
     id="gym_so100/SO100PickCubeRollout-v0",
-    entry_point="gym_so100.wrappers.factory:make_so100_env_for_rollout",
+    entry_point="project.rl.gym_so100.wrappers.factory:make_so100_env_for_rollout",
     max_episode_steps=100,
     kwargs={
         "task_name": "pick_cube",
